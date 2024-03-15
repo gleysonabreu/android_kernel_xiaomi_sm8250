@@ -38,7 +38,41 @@ KBUILD_LINKER_STRING=$($HOME/tc/aosp-clang/bin/ld.lld --version | head -n 1 | pe
 export KBUILD_COMPILER_STRING
 export KBUILD_LINKER_STRING
 
-DEVICE=$1
+read -p "Update kernelSU? (y/n): " choice
+
+if [ "$choice" = "y" ]; then
+	rm -rf KernelSU
+
+	read -p "Selection kernelsu version (dev/stable) : (1/0): " channel
+
+	if [ "$channel" = "1" ]; then
+    echo "Selected dev branch"
+    curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
+  elif [ "$channel" = "0" ]; then
+    echo "Selected main branch"
+    curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+  else
+    echo "Invalid selection"
+    exit 1
+  fi
+fi
+
+read -p "Select device: (alioth=0, apollo=1, lmi=2, munch=3, psyche=4): " device
+
+if [ "$device" = "0" ]; then
+DEVICE=alioth
+elif [ "$device" = "1" ]; then
+DEVICE=apollo
+elif [ "$device" = "2" ]; then
+DEVICE=lmi
+elif [ "$device" = "3" ]; then
+DEVICE=munch
+elif [ "$device" = "4" ]; then
+DEVICE=psyche
+else 
+	echo "Invalid device"
+	exit 1
+fi
 
 if [ "${DEVICE}" = "alioth" ]; then
 DEFCONFIG=vendor/alioth_defconfig
@@ -136,7 +170,7 @@ if [ -f "out/arch/arm64/boot/Image" ] && [ -f "out/arch/arm64/boot/dtbo.img" ] &
 	echo ""
 	echo -e ${zipname} " is ready!"
 	echo ""
-        curl --upload-file ${zipname} https://free.keep.sh
+				curl -F "file=@${zipname}" https://temp.sh/upload
 else
 	echo -e "\n Compilation Failed!"
 fi
