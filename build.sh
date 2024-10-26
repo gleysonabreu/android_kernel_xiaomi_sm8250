@@ -47,10 +47,10 @@ if [ "$choice" = "y" ]; then
 
 	if [ "$channel" = "1" ]; then
     echo "Selected dev branch"
-    curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
+    curl -LSs curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
   elif [ "$channel" = "0" ]; then
     echo "Selected main branch"
-    curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+    curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
   else
     echo "Invalid selection"
     exit 1
@@ -94,6 +94,14 @@ DATE=$(date '+%Y%m%d-%H%M')
 
 # Set our directory
 OUT_DIR=out/
+
+# Boot original image dir
+export BOOT_DIR=/mnt/c/Users/aberforth/Downloads/boot.img
+
+# New boot image dir
+export NEW_BOOT_DIR=/mnt/c/Users/aberforth/Downloads/out
+
+export KERNEL_DIR=$(pwd)
 
 VERSION="Uvite-${DEVICE}-${DATE}"
 
@@ -147,30 +155,46 @@ END=$(date +"%s")
 DIFF=$((END - START))
 zipname="$VERSION.zip"
 if [ -f "out/arch/arm64/boot/Image" ] && [ -f "out/arch/arm64/boot/dtbo.img" ] && [ -f "out/arch/arm64/boot/dtb" ]; then
-        if [ "${DEVICE}" = "alioth" ]; then
-          git clone -q https://github.com/madmax7896/AnyKernel3.git -b alioth
-        elif [ "${DEVICE}" = "apollo" ]; then
-          git clone -q https://github.com/madmax7896/AnyKernel3.git -b apollo
-        elif [ "${DEVICE}" = "lmi" ]; then
-          git clone -q https://github.com/madmax7896/AnyKernel3.git -b lmi
-        elif [ "${DEVICE}" = "munch" ]; then
-          git clone -q https://github.com/madmax7896/AnyKernel3.git -b munch-uvite
-        else
-          git clone -q https://github.com/madmax7896/AnyKernel3.git -b psyche
-	fi
-	cp out/arch/arm64/boot/Image AnyKernel3
-	cp out/arch/arm64/boot/dtb AnyKernel3
-	cp out/arch/arm64/boot/dtbo.img AnyKernel3
-	rm -f *zip
-	cd AnyKernel3
-	zip -r9 "../${zipname}" * -x '*.git*' README.md *placeholder >> /dev/null
-	cd ..
-	rm -rf AnyKernel3
-	echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
-	echo ""
-	echo -e ${zipname} " is ready!"
-	echo ""
-				curl -F "file=@${zipname}" https://temp.sh/upload
+ #        if [ "${DEVICE}" = "alioth" ]; then
+ #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b alioth
+ #        elif [ "${DEVICE}" = "apollo" ]; then
+ #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b apollo
+ #        elif [ "${DEVICE}" = "lmi" ]; then
+ #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b lmi
+ #        elif [ "${DEVICE}" = "munch" ]; then
+ #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b munch-uvite
+ #        else
+ #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b psyche
+	# fi
+	# cp out/arch/arm64/boot/Image AnyKernel3
+	# cp out/arch/arm64/boot/dtb AnyKernel3
+	# cp out/arch/arm64/boot/dtbo.img AnyKernel3
+	# rm -f *zip
+	# cd AnyKernel3
+	# zip -r9 "../${zipname}" * -x '*.git*' README.md *placeholder >> /dev/null
+	# cd ..
+	# rm -rf AnyKernel3
+	# echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
+	# echo ""
+	# echo -e ${zipname} " is ready!"
+	# echo ""
+
+  cd out/arch/arm64/boot
+  wget https://github.com/dibin666/toolchains/releases/download/magiskboot/magiskbootx86_64
+  chmod +x magiskbootx86_64
+
+  cp $BOOT_DIR ./
+  ./magiskbootx86_64 unpack boot.img
+  
+  mv -f Image kernel
+  ./magiskbootx86_64 repack boot.img
+
+  cp new-boot.img $NEW_BOOT_DIR
+
+  cd $KERNEL_DIR
+  rm -rf out
+  
+  curl -F "file=@${NEW_BOOT_DIR}/new-boot.img" https://temp.sh/upload
 else
 	echo -e "\n Compilation Failed!"
 fi
