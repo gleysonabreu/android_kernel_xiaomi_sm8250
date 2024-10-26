@@ -17,19 +17,19 @@
 # limitations under the License.
 
 if ! [ -d "$HOME/tc/aosp-clang" ]; then
-echo "aosp clang not found! Cloning..."
-if ! git clone -q https://gitlab.com/ThankYouMario/android_prebuilts_clang-standalone.git --depth=1 ~/tc/aosp-clang; then
-echo "Cloning failed! Aborting..."
-exit 1
-fi
+  echo "aosp clang not found! Cloning..."
+  if ! git clone -q https://gitlab.com/ThankYouMario/android_prebuilts_clang-standalone.git --depth=1 ~/tc/aosp-clang; then
+    echo "Cloning failed! Aborting..."
+    exit 1
+  fi
 fi
 
 if ! [ -d "$HOME/tc/aarch64-linux-android-4.9" ]; then
-echo "aarch64-linux-android-4.9 not found! Cloning..."
-if ! git clone -q https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9.git --depth=1 --single-branch ~/tc/aarch64-linux-android-4.9; then
-echo "Cloning failed! Aborting..."
-exit 1
-fi
+  echo "aarch64-linux-android-4.9 not found! Cloning..."
+  if ! git clone -q https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9.git --depth=1 --single-branch ~/tc/aarch64-linux-android-4.9; then
+    echo "Cloning failed! Aborting..."
+    exit 1
+  fi
 fi
 
 GCC_64_DIR="$HOME/tc/aarch64-linux-android-4.9"
@@ -41,11 +41,11 @@ export KBUILD_LINKER_STRING
 read -p "Update kernelSU? (y/n): " choice
 
 if [ "$choice" = "y" ]; then
-	rm -rf KernelSU
+  rm -rf KernelSU
 
-	read -p "Selection kernelsu version (dev/stable) : (1/0): " channel
+  read -p "Selection kernelsu version (dev/stable) : (1/0): " channel
 
-	if [ "$channel" = "1" ]; then
+  if [ "$channel" = "1" ]; then
     echo "Selected dev branch"
     curl -LSs curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
   elif [ "$channel" = "0" ]; then
@@ -60,30 +60,30 @@ fi
 read -p "Select device: (alioth=0, apollo=1, lmi=2, munch=3, psyche=4): " device
 
 if [ "$device" = "0" ]; then
-DEVICE=alioth
+  DEVICE=alioth
 elif [ "$device" = "1" ]; then
-DEVICE=apollo
+  DEVICE=apollo
 elif [ "$device" = "2" ]; then
-DEVICE=lmi
+  DEVICE=lmi
 elif [ "$device" = "3" ]; then
-DEVICE=munch
+  DEVICE=munch
 elif [ "$device" = "4" ]; then
-DEVICE=psyche
-else 
-	echo "Invalid device"
-	exit 1
+  DEVICE=psyche
+else
+  echo "Invalid device"
+  exit 1
 fi
 
 if [ "${DEVICE}" = "alioth" ]; then
-DEFCONFIG=vendor/alioth_defconfig
+  DEFCONFIG=vendor/alioth_defconfig
 elif [ "${DEVICE}" = "apollo" ]; then
-DEFCONFIG=vendor/apollo_defconfig
+  DEFCONFIG=vendor/apollo_defconfig
 elif [ "${DEVICE}" = "lmi" ]; then
-DEFCONFIG=vendor/lmi_defconfig
+  DEFCONFIG=vendor/lmi_defconfig
 elif [ "${DEVICE}" = "munch" ]; then
-DEFCONFIG=vendor/munch_defconfig
+  DEFCONFIG=vendor/munch_defconfig
 elif [ "${DEVICE}" = "psyche" ]; then
-DEFCONFIG=vendor/psyche_defconfig
+  DEFCONFIG=vendor/psyche_defconfig
 fi
 
 #
@@ -110,8 +110,8 @@ export ZIPNAME="${VERSION}.zip"
 
 # How much kebabs we need? Kanged from @raphielscape :)
 if [[ -z "${KEBABS}" ]]; then
-    COUNT="$(grep -c '^processor' /proc/cpuinfo)"
-    export KEBABS="$((COUNT + 2))"
+  COUNT="$(grep -c '^processor' /proc/cpuinfo)"
+  export KEBABS="$((COUNT + 2))"
 fi
 
 echo "Jobs: ${KEBABS}"
@@ -155,29 +155,6 @@ END=$(date +"%s")
 DIFF=$((END - START))
 zipname="$VERSION.zip"
 if [ -f "out/arch/arm64/boot/Image" ] && [ -f "out/arch/arm64/boot/dtbo.img" ] && [ -f "out/arch/arm64/boot/dtb" ]; then
- #        if [ "${DEVICE}" = "alioth" ]; then
- #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b alioth
- #        elif [ "${DEVICE}" = "apollo" ]; then
- #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b apollo
- #        elif [ "${DEVICE}" = "lmi" ]; then
- #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b lmi
- #        elif [ "${DEVICE}" = "munch" ]; then
- #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b munch-uvite
- #        else
- #          git clone -q https://github.com/madmax7896/AnyKernel3.git -b psyche
-	# fi
-	# cp out/arch/arm64/boot/Image AnyKernel3
-	# cp out/arch/arm64/boot/dtb AnyKernel3
-	# cp out/arch/arm64/boot/dtbo.img AnyKernel3
-	# rm -f *zip
-	# cd AnyKernel3
-	# zip -r9 "../${zipname}" * -x '*.git*' README.md *placeholder >> /dev/null
-	# cd ..
-	# rm -rf AnyKernel3
-	# echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
-	# echo ""
-	# echo -e ${zipname} " is ready!"
-	# echo ""
 
   cd out/arch/arm64/boot
   wget https://github.com/dibin666/toolchains/releases/download/magiskboot/magiskbootx86_64
@@ -185,7 +162,7 @@ if [ -f "out/arch/arm64/boot/Image" ] && [ -f "out/arch/arm64/boot/dtbo.img" ] &
 
   cp $BOOT_DIR ./
   ./magiskbootx86_64 unpack boot.img
-  
+
   mv -f Image kernel
   ./magiskbootx86_64 repack boot.img
 
@@ -193,8 +170,8 @@ if [ -f "out/arch/arm64/boot/Image" ] && [ -f "out/arch/arm64/boot/dtbo.img" ] &
 
   cd $KERNEL_DIR
   rm -rf out
-  
+
   curl -F "file=@${NEW_BOOT_DIR}/new-boot.img" https://temp.sh/upload
 else
-	echo -e "\n Compilation Failed!"
+  echo -e "\n Compilation Failed!"
 fi
